@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Directorio Comercial - San Mateo Oxtotitlán</title>
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Tipografía: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- Encabezado Principal / Hero Section -->
+  <header class="bg-slate-900 text-white py-10 px-4 sm:px-6 text-center border-b border-slate-800 relative overflow-hidden">
+    <div class="max-w-4xl mx-auto relative z-10">
+      <span class="bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold px-3.5 py-1 rounded-full uppercase tracking-wider inline-block mb-3">San Mateo Oxtotitlán</span>
+      <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight mb-3">Directorio Comercial & Servicios</h1>
+      <p class="text-slate-400 text-sm sm:text-base max-w-xl mx-auto">Encuentra profesionistas, oficios y comercios verificados de nuestra colonia en un solo lugar.</p>
+    </div>
+  </header>
+
+  <!-- Barra de Búsqueda y Filtro de Categorías -->
+  <section class="max-w-5xl mx-auto w-full px-4 py-6">
+    <!-- Buscador en tiempo real -->
+    <div class="mb-5">
+      <input type="text" id="searchInput" placeholder="¿Qué servicio o negocio buscas? (ej. Contador, Plomero, Birria...)" class="w-full bg-white border border-slate-200 rounded-2xl px-5 py-3.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-sm transition">
+    </div>
+    
+    <!-- Filtros Rápidos de Categorías -->
+    <div class="flex flex-wrap gap-2 justify-center" id="categoryContainer">
+      <button onclick="filterCategory('Todos')" class="cat-btn active-cat bg-slate-900 text-white px-4 py-2 rounded-full text-xs font-bold transition shadow-sm">Todos</button>
+      <button onclick="filterCategory('Servicios')" class="cat-btn bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 px-4 py-2 rounded-full text-xs font-semibold transition">Servicios</button>
+      <button onclick="filterCategory('Comida')" class="cat-btn bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 px-4 py-2 rounded-full text-xs font-semibold transition">Comida</button>
+      <button onclick="filterCategory('Oficios')" class="cat-btn bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 px-4 py-2 rounded-full text-xs font-semibold transition">Oficios</button>
+      <button onclick="filterCategory('Salud')" class="cat-btn bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 px-4 py-2 rounded-full text-xs font-semibold transition">Salud</button>
+      <button onclick="filterCategory('Clasificados')" class="cat-btn bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 px-4 py-2 rounded-full text-xs font-semibold transition">🏷️ Clasificados / Usados</button>
+    </div>
+  </section>
+
+  <!-- Contenedor Dinámico del Directorio -->
+  <main class="max-w-5xl mx-auto w-full px-4 pb-16 flex-grow">
+    <div id="directoryGrid" class="grid grid-cols-1 gap-6">
+      <!-- Las tarjetas se generan dinámicamente con JavaScript -->
+    </div>
+  </main>
+
+  <!-- Pie de Página -->
+  <footer class="bg-slate-900 text-slate-400 text-center py-6 text-xs border-t border-slate-800">
+    <p>© 2026 Directorio Comercial San Mateo Oxtotitlán. Impulso e integridad para nuestra comunidad.</p>
+  </footer>
+
+  <!-- Lógica en JavaScript -->
+  <script>
+    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSsLf7likukEqH5pHQ1nDabPxFHiHehNZQ4d-w2-quFMKbr2hEjXbC0kNNty-MpcR5mYRo9kejx6eBI/pub?output=csv';
+
+    // DATOS DE RESPALDO (Por si falla la conexión)
+    const sampleData = [
+      { id: '1', nombre: 'Clínica Dental San Mateo', categoria: 'Salud', descripcion: 'Atención especializada, ortodoncia e implantes con equipo de última generación.', telefono: '527220001122', imagen: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=500', tipo: 'DoblePremium', estatus: 'Aprobado' },
+      { id: '2', nombre: 'Birria de Res "El Mercadito"', categoria: 'Comida', descripcion: 'Quesabirrias y consomé delicioso todos los domingos en El Mercadito.', telefono: '527221234567', imagen: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=500', tipo: 'Premium', estatus: 'Aprobado' },
+      { id: '3', nombre: 'Despacho Contable & Fiscal', categoria: 'Servicios', descripcion: 'Asesoría fiscal e impuestos para comercios y personas físicas.', telefono: '527229876543', imagen: '', tipo: 'Premium', estatus: 'Aprobado' },
+      { id: '4', nombre: 'Gordidelicias', categoria: 'Comida', descripcion: 'Gorditas, postres y desayunos. Envíos a domicilio directos en la colonia.', telefono: '527227642582', imagen: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500', tipo: 'Estandar', estatus: 'Aprobado' },
+      { id: '5', nombre: 'Plomería Urgente San Mateo', categoria: 'Oficios', descripcion: 'Reparación de fugas, instalación de bombas y mantenimiento en general 24/7.', telefono: '527225551122', imagen: '', tipo: 'Estandar', estatus: 'Aprobado' },
+      { id: '6', nombre: 'Bicicleta Rodada 26 Usada', categoria: 'Ventas', descripcion: 'En muy buen estado, frenos nuevos, $800 MXN a tratar.', telefono: '527220000000', imagen: 'https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=500', tipo: 'Clasificado', estatus: 'Aprobado' }
+    ];
+
+    let currentData = [];
+    let activeCategory = 'Todos';
+
+    async function init() {
+      if (SHEET_CSV_URL) {
+        try {
+          // Cache-Buster para forzar datos frescos en cada recarga
+          const cacheBuster = '&_t=' + new Date().getTime();
+          const res = await fetch(SHEET_CSV_URL + cacheBuster);
+          const text = await res.text();
+          currentData = parseCSV(text);
+        } catch (err) {
+          console.error('Error cargando CSV, cargando datos de prueba:', err);
+          currentData = sampleData;
+        }
+      } else {
+        currentData = sampleData;
+      }
+      renderGrid();
+    }
+
+    function parseCSV(csvText) {
+      const cleanText = csvText.replace(/\r/g, '').trim();
+      const lines = cleanText.split('\n');
+      if (lines.length < 2) return [];
+
+      // Regex para separar comas respetando textos entre comillas
+      const splitCSVLine = (line) => line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+      const headers = splitCSVLine(lines[0]).map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
+
+      const result = [];
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        const currentline = splitCSVLine(lines[i]).map(item => item.trim().replace(/^"|"$/g, ''));
+        
+        let obj = {};
+        for (let j = 0; j < headers.length; j++) {
+          obj[headers[j]] = currentline[j] || '';
+        }
+        result.push(obj);
+      }
+      return result;
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('directoryGrid');
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      grid.innerHTML = '';
+
+      const filtered = currentData.filter(item => {
+        const matchesEstatus = item.estatus && item.estatus.trim().toLowerCase() === 'aprobado';
+        
+        const isClasificadoFilter = activeCategory === 'Clasificados' && item.tipo && item.tipo.trim().toLowerCase() === 'clasificado';
+        const matchesCat = activeCategory === 'Todos' || item.categoria === activeCategory || isClasificadoFilter;
+
+        const matchesSearch = (item.nombre && item.nombre.toLowerCase().includes(searchTerm)) || 
+                              (item.descripcion && item.descripcion.toLowerCase().includes(searchTerm)) ||
+                              (item.categoria && item.categoria.toLowerCase().includes(searchTerm));
+        return matchesEstatus && matchesCat && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 font-medium">No se encontraron registros activos en esta búsqueda.</div>`;
+        return;
+      }
+
+      // SEPARACIÓN POR NIVELES
+      const doblePremiumList = filtered.filter(i => i.tipo && i.tipo.trim().toLowerCase() === 'doblepremium');
+      const premiumList = filtered.filter(i => i.tipo && i.tipo.trim().toLowerCase() === 'premium');
+      const estandarList = filtered.filter(i => i.tipo && i.tipo.trim().toLowerCase() === 'estandar');
+      const clasificadosList = filtered.filter(i => i.tipo && i.tipo.trim().toLowerCase() === 'clasificado');
+
+      // 0. BLOQUE DOBLE PREMIUM / PATROCINADOR OFICIAL (Ancho Completo - Cima Absoluta)
+      if (doblePremiumList.length > 0) {
+        const dpSection = document.createElement('div');
+        dpSection.className = "col-span-full mb-8";
+        dpSection.innerHTML = `<h2 class="text-xl font-extrabold text-slate-900 mb-4 flex items-center gap-2">👑 Patrocinadores Oficiales <span class="text-xs bg-amber-400 text-slate-950 font-black px-2.5 py-0.5 rounded-full uppercase">Exclusivo</span></h2>`;
+        
+        const dpGrid = document.createElement('div');
+        dpGrid.className = "grid grid-cols-1 gap-6";
+
+        doblePremiumList.forEach(item => {
+          const card = document.createElement('div');
+          card.className = "bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white rounded-3xl p-6 ring-4 ring-amber-400/50 shadow-2xl flex flex-col md:flex-row gap-6 items-center justify-between relative overflow-hidden";
+          
+          const hasImage = item.imagen && item.imagen.trim() !== '';
+          const imgHTML = hasImage ? `<img src="${item.imagen}" alt="${item.nombre}" class="w-full md:w-1/3 h-48 object-cover rounded-2xl border border-amber-400/30">` : '';
+
+          card.innerHTML = `
+            <div class="w-full ${hasImage ? 'md:w-2/3' : 'w-full'}">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black text-[11px] uppercase px-3 py-1 rounded-full shadow-md">👑 Patrocinador Oficial</span>
+                <span class="text-xs text-amber-300 font-bold">${item.categoria}</span>
+              </div>
+              <h3 class="text-2xl font-black text-white mb-2">${item.nombre}</h3>
+              <p class="text-slate-300 text-sm leading-relaxed mb-4">${item.descripcion}</p>
+              <a href="https://wa.me/${item.telefono}?text=Hola,%20te%20encontré%20como%20Patrocinador%20Oficial" target="_blank" class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-sm py-3 px-6 rounded-xl shadow-lg transition">
+                💬 Contactar Preferencial por WhatsApp
+              </a>
+            </div>
+            ${imgHTML}
+          `;
+          dpGrid.appendChild(card);
+        });
+        dpSection.appendChild(dpGrid);
+        grid.appendChild(dpSection);
+      }
+
+      // 1. BLOQUE PREMIUM (Socios Fundadores)
+      if (premiumList.length > 0) {
+        const pSection = document.createElement('div');
+        pSection.className = "col-span-full mb-8";
+        pSection.innerHTML = `<h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">⭐ Socios Fundadores <span class="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full">Destacados</span></h2>`;
+        const pGrid = document.createElement('div');
+        pGrid.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6";
+
+        premiumList.forEach(item => {
+          const card = document.createElement('div');
+          card.className = "bg-slate-900 text-white rounded-2xl p-5 ring-2 ring-amber-400 shadow-xl flex flex-col justify-between relative overflow-hidden transition transform hover:-translate-y-1";
+          
+          const hasImage = item.imagen && item.imagen.trim() !== '';
+          const imgHTML = hasImage ? `<img src="${item.imagen}" alt="${item.nombre}" class="w-full h-44 object-cover rounded-xl mb-3 border border-slate-800">` : '';
+
+          card.innerHTML = `
+            <div>
+              <div class="flex justify-between items-start mb-3">
+                <span class="bg-amber-400 text-slate-950 font-extrabold text-[10px] uppercase px-2.5 py-1 rounded-full tracking-wider shadow-sm">⭐ Socio Fundador</span>
+                <span class="text-xs text-slate-400 font-semibold">${item.categoria}</span>
+              </div>
+              ${imgHTML}
+              <h3 class="text-lg font-bold text-white mb-1.5">${item.nombre}</h3>
+              <p class="text-slate-300 text-xs leading-relaxed mb-5">${item.descripcion}</p>
+            </div>
+            <a href="https://wa.me/${item.telefono}?text=Hola,%20te%20encontré%20en%20el%20Directorio%20Comercial" target="_blank" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm py-3 px-4 rounded-xl text-center flex items-center justify-center gap-2 shadow-lg transition">
+              💬 Contactar por WhatsApp
+            </a>
+          `;
+          pGrid.appendChild(card);
+        });
+        pSection.appendChild(pGrid);
+        grid.appendChild(pSection);
+      }
+
+      // 2. BLOQUE ESTÁNDAR (Comercios y Servicios Fijos)
+      if (estandarList.length > 0) {
+        const eSection = document.createElement('div');
+        eSection.className = "col-span-full my-6";
+        eSection.innerHTML = `<h2 class="text-xl font-bold text-slate-900 mb-4">🏪 Comercios y Servicios Fijos</h2>`;
+        const eGrid = document.createElement('div');
+        eGrid.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6";
+
+        estandarList.forEach(item => {
+          const card = document.createElement('div');
+          card.className = "bg-white border border-slate-200 text-slate-800 rounded-2xl p-5 shadow-sm flex flex-col justify-between transition hover:shadow-md";
+          
+          const hasImage = item.imagen && item.imagen.trim() !== '';
+          const imgHTML = hasImage ? `<img src="${item.imagen}" alt="${item.nombre}" class="w-full h-36 object-cover rounded-xl mb-3 border border-slate-100">` : '';
+
+          card.innerHTML = `
+            <div>
+              <div class="flex justify-between items-start mb-2">
+                <span class="bg-slate-100 text-slate-600 font-semibold text-[10px] uppercase px-2 py-0.5 rounded-md">${item.categoria}</span>
+              </div>
+              ${imgHTML}
+              <h3 class="text-base font-bold text-slate-900 mb-1">${item.nombre}</h3>
+              <p class="text-slate-600 text-xs leading-relaxed mb-4">${item.descripcion}</p>
+            </div>
+            <a href="https://wa.me/${item.telefono}?text=Hola,%20te%20encontré%20en%20el%20Directorio%20Comercial" target="_blank" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs py-2.5 px-3 rounded-xl text-center flex items-center justify-center gap-2 transition">
+              💬 Escribir al WhatsApp
+            </a>
+          `;
+          eGrid.appendChild(card);
+        });
+        eSection.appendChild(eGrid);
+        grid.appendChild(eSection);
+      }
+
+      // 3. BLOQUE CLASIFICADOS (Mercadito de Usados)
+      if (clasificadosList.length > 0) {
+        const cSection = document.createElement('div');
+        cSection.className = "col-span-full mt-8 pt-6 border-t border-slate-200";
+        cSection.innerHTML = `<h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">🏷️ Mercadito de Clasificados <span class="text-xs text-slate-500 font-normal">(Ventas casuales y usados)</span></h2>`;
+        const cGrid = document.createElement('div');
+        cGrid.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4";
+
+        clasificadosList.forEach(item => {
+          const card = document.createElement('div');
+          card.className = "bg-slate-100 border border-dashed border-slate-300 text-slate-700 rounded-xl p-4 text-xs flex flex-col justify-between shadow-none hover:bg-slate-50 transition";
+          
+          const hasImage = item.imagen && item.imagen.trim() !== '';
+          const imgHTML = hasImage ? `<img src="${item.imagen}" alt="${item.nombre}" class="w-full h-28 object-cover rounded-lg mb-2">` : '';
+
+          card.innerHTML = `
+            <div>
+              <span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-md text-[10px] inline-block mb-1.5">${item.categoria}</span>
+              ${imgHTML}
+              <h4 class="font-bold text-slate-900 text-sm mb-1">${item.nombre}</h4>
+              <p class="text-slate-500 text-xs leading-relaxed mb-3">${item.descripcion}</p>
+            </div>
+            <a href="https://wa.me/${item.telefono}?text=Hola,%20me%20interesa%20tu%20clasificado" target="_blank" class="text-emerald-600 font-bold hover:underline text-xs flex items-center gap-1">
+              💬 Contactar Vendedor →
+            </a>
+          `;
+          cGrid.appendChild(card);
+        });
+        cSection.appendChild(cGrid);
+        grid.appendChild(cSection);
+      }
+    }
+
+    function filterCategory(cat) {
+      activeCategory = cat;
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.classList.remove('bg-slate-900', 'text-white');
+        btn.classList.add('bg-white', 'text-slate-600', 'border', 'border-slate-200');
+      });
+      event.target.classList.remove('bg-white', 'text-slate-600', 'border', 'border-slate-200');
+      event.target.classList.add('bg-slate-900', 'text-white');
+      renderGrid();
+    }
+
+    document.getElementById('searchInput').addEventListener('input', renderGrid);
+    init();
+  </script>
+</body>
+</html>
